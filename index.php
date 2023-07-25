@@ -6,8 +6,30 @@ ini_set('display_startup_errors', 'On');
 
 
 include './lib/database.php';
+include './lib/route.php';
+require __DIR__.'/vendor/autoload.php';
 
 $db = new Database('localhost', 'root', 'root', 'cms_bandefm');
+
+function handle_route($routes, $current_uri) {
+    foreach ($routes as $route_str => $thing) {
+        list($http_verb, $location) = explode(' ', $route_str);
+        $route = new Route($http_verb, $location);
+        if ($route->matches($current_uri)) {
+            // depending on $thing's nature, do something to handle this route...
+            if (is_array($thing) && isset($thing['query']) && isset($thing['params'])) {
+                $data = get_data($thing);
+                echo json(['data' => $data]);
+                exit;
+            }
+
+            if (is_callable($thing)) {
+                $thing($_GET, $_POST);
+                exit;
+            }
+        }
+    }
+}
 
 function json($data) {
     header('Content-Type: application/json');
@@ -24,13 +46,18 @@ function html($data) {
     return $twig->render('app.twig.html', $data);
 }
 
+/**
+ * @param array $params [query] => String, [params] => Array
+ */
+function get_data($params) {
+    global $db;
+    return $db->fetchObjects($params['query'], $params['params']);
+}
+
+
+
 // Declaration of the actions:
 $routes = [
-    'GET /app' => [
-        'data' => [
-            'title' => 'Gestion de contenu',
-        ]
-    ],
     'GET /pages' => [
         'query' => "SELECT ID, post_title, post_name FROM wp_posts WHERE post_status = ? AND post_type = ?",
         'params' => [
@@ -38,63 +65,30 @@ $routes = [
             'page'
         ],
     ],
+    'GET /pages/:id' => [
+
+    ],
 ];
 
 
-require __DIR__.'/vendor/autoload.php';
+// Allow requests from http://localhost:8080
+header('Access-Control-Allow-Origin: http://localhost:8080');
 
+// Set allowed request methods (e.g., GET, POST, OPTIONS)
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 
-$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) use ($db, $routes) {
-    
-    // meta programming of some actions:
-    foreach ($routes as $route => $data) {
-        list($verb, $path) = explode(' ', $route);
-        $r->addRoute($verb, $path, function () use ($db, $data) {
-            if (isset($data['query']) && isset($data['params'])) {
-                $result = $db->fetchObjects(
-                    $data['query'],
-                    $data['params']
-                );
-                echo json($result);
-            } elseif (isset($data['data'])) {
-                echo html($data['data']);
-            } else {
-                echo html(['title' => 'erreur.']);
-            }
-        });
-    }
+// Allow specific request headers
+header('Access-Control-Allow-Headers: Content-Type');
 
-    // {id} must be a number (\d+)
-    $r->addRoute('GET', '/user/{id:\d+}', 'get_user_handler');
-    // The /{title} suffix is optional
-    $r->addRoute('GET', '/articles/{id:\d+}[/{title}]', 'get_article_handler');
-});
+// Allow credentials (if your frontend sends cookies with requests)
+header('Access-Control-Allow-Credentials: true');
 
-
-
-// Fetch method and URI from somewhere
-$httpMethod = $_SERVER['REQUEST_METHOD'];
-$uri = $_SERVER['REQUEST_URI'];
-
-// Strip query string (?foo=bar) and decode URI
-if (false !== $pos = strpos($uri, '?')) {
-    $uri = substr($uri, 0, $pos);
+// Handle preflight requests for non-simple methods (e.g., POST with custom headers)
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204); // No content in response for preflight requests
+    exit();
 }
-$uri = rawurldecode($uri);
 
-$routeInfo = $dispatcher->dispatch($httpMethod, $uri);
-switch ($routeInfo[0]) {
-    case FastRoute\Dispatcher::NOT_FOUND:
-        die("Erreur 404: C'pas trouvable.");
-        break;
-    case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
-        $allowedMethods = $routeInfo[1];
-        die("Erreur 405: Pas l'droit d'faire ça.");
-        break;
-    case FastRoute\Dispatcher::FOUND:
-        $handler = $routeInfo[1];
-        $vars = $routeInfo[2];
+$current_uri = $_GET['uri'];
 
-        $handler($vars);
-        break;
-}
+handle_route($routes, $current_uri);
