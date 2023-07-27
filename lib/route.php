@@ -41,20 +41,42 @@ class Route {
         return true;
     }
 
-
     /**
      * @return RouteSegment[] The number of segments in the URI
      */
-    function getUriSegments()
+    public function getUriSegments()
     {
         $uri = trim($this->uri, '/'); // remove start and end slashes
         return array_map(function ($s) { return new RouteSegment($s); }, explode('/', $uri));
     }
 
-    protected function countSegments($uri): int
+    /**
+     * @param string $url
+     *
+     * @return string[]
+     */
+    public function parse($url): array
+    {
+        $uri = $this->getSegments($this->uri);
+        $url = is_array($url) ? $url : $this->getSegments($url);
+        $result = [];
+        foreach ($url as $key => $value) {
+            if (isset($uri[$key]) && $uri[$key] !== $value) {
+                $result[] = $value;
+            }
+        }
+        return $result;
+    }
+
+    protected function getSegments($uri): array
     {
         $uri = trim($uri, '/'); // remove start and end slashes
-        return count(explode('/', $uri));
+        return explode('/', $uri);
+    }
+
+    protected function countSegments($uri): int
+    {
+        return count($this->getSegments($uri));
     }
 
     /**

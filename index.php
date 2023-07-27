@@ -11,6 +11,12 @@ require __DIR__.'/vendor/autoload.php';
 
 $db = new Database('localhost', 'root', 'root', 'cms_bandefm');
 
+function error_404() {
+    http_response_code(404);
+    echo '404 not found';
+    exit;
+}
+
 function handle_route($routes, $current_uri) {
     foreach ($routes as $route_str => $thing) {
         list($http_verb, $location) = explode(' ', $route_str);
@@ -24,26 +30,19 @@ function handle_route($routes, $current_uri) {
             }
 
             if (is_callable($thing)) {
-                $thing($_GET, $_POST);
+                $params = $route->parse($current_uri);
+                $thing(...$params);
                 exit;
             }
         }
     }
+
+    error_404();
 }
 
 function json($data) {
     header('Content-Type: application/json');
     return json_encode($data);
-}
-
-function html($data) {
-    header('Content-Type: text/html');
-    $loader = new \Twig\Loader\FilesystemLoader(__DIR__.'/templates');
-    $twig = new \Twig\Environment($loader, [
-        'cache' => false # __DIR__.'/tmp/template_cache',
-    ]);
-
-    return $twig->render('app.twig.html', $data);
 }
 
 /**
@@ -65,30 +64,35 @@ $routes = [
             'page'
         ],
     ],
-    'GET /pages/:id' => [
-
-    ],
+    'GET /pages/:id/edit' => function ($id) {
+      echo $id;
+      echo 'eti';
+    },
+    'GET /pages/:id' => function ($id) {
+      echo 'joie';
+    },
 ];
 
 
-// Allow requests from http://localhost:8080
-header('Access-Control-Allow-Origin: http://localhost:8080');
-
-// Set allowed request methods (e.g., GET, POST, OPTIONS)
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-
-// Allow specific request headers
-header('Access-Control-Allow-Headers: Content-Type');
-
-// Allow credentials (if your frontend sends cookies with requests)
-header('Access-Control-Allow-Credentials: true');
-
-// Handle preflight requests for non-simple methods (e.g., POST with custom headers)
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204); // No content in response for preflight requests
-    exit();
-}
+# // Allow requests from http://localhost:8080
+# header('Access-Control-Allow-Origin: http://localhost:8080');
+# 
+# // Set allowed request methods (e.g., GET, POST, OPTIONS)
+# header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+# 
+# // Allow specific request headers
+# header('Access-Control-Allow-Headers: Content-Type');
+# 
+# // Allow credentials (if your frontend sends cookies with requests)
+# header('Access-Control-Allow-Credentials: true');
+# 
+# // Handle preflight requests for non-simple methods (e.g., POST with custom headers)
+# if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+#     http_response_code(204); // No content in response for preflight requests
+#     exit();
+# }
+# 
 
 $current_uri = $_GET['uri'];
-
+ 
 handle_route($routes, $current_uri);
