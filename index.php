@@ -54,6 +54,34 @@ function get_data($params) {
 }
 
 
+spl_autoload_register(function ($class_name) {
+	// Convert the class name to filename format
+	$file_name = convertClassNameToFileName($class_name);
+	// try in actions/:
+	$file_path = __DIR__.'/actions/'.$file_name;
+	if (file_exists($file_path)) {
+			require_once($file_path);
+	}
+	// try again, in lib/:
+	$file_path = __DIR__.'/lib/'.$file_name;
+	if (file_exists($file_path)) {
+			require_once($file_path);
+	}
+});
+
+function convertClassNameToFileName($class_name) {
+    // Make the first letter lowercase
+    $file_name = lcfirst($class_name);
+
+    // Add underscores before each uppercase letter
+    $file_name = preg_replace('/([a-z])([A-Z])/', '$1_$2', $file_name);
+
+    // Add the "_class.php" extension
+    $file_name .= '.php';
+
+    return strtolower($file_name);
+}
+
 
 // Declaration of the actions:
 $routes = [
@@ -65,8 +93,7 @@ $routes = [
         ],
     ],
     'GET /pages/:id/edit' => function ($id) {
-      echo $id;
-      echo 'eti';
+      echo new PageUpsert($id);
     },
     'GET /pages/:id' => function ($id) {
       echo 'joie';
@@ -96,3 +123,4 @@ $routes = [
 $current_uri = $_GET['uri'];
  
 handle_route($routes, $current_uri);
+
