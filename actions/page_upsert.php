@@ -17,6 +17,7 @@ class PageUpsert extends Upsert {
       $html .= '</p>';
     }
     $html .= '<input type="submit">';
+    $html .= 'or <a href="?uri=/pages/">Cancel</a>';
 		$html .= '</form>';
     return $html;
   }

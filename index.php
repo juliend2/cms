@@ -5,6 +5,7 @@ ini_set('display_errors', 'On');
 ini_set('display_startup_errors', 'On');
 
 
+include './lib/helpers.php';
 include './lib/database.php';
 include './lib/route.php';
 require __DIR__.'/vendor/autoload.php';
