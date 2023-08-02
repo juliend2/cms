@@ -4,14 +4,24 @@ class Page extends WpPost {
   public $data = [];
   function __construct($opts) {
     parent::__construct($opts);
-    $this->id = intval($opts['id']) ?? null;
+    $this->id = $opts['id'] ?? null;
     if ($this->id) {
       $this->data = $this->getRow();
     }
     $this->form_fields = [
-      new Field(['slug'=>'post_title', 'type'=>'string', 'value'=>$this->data->post_title]),
+      new Field(['slug'=>'post_title', 'name'=>'Title', 'type'=>'string']),
       new Field(['slug'=>'post_name', 'name'=>'Slug', 'type'=>'string']),
     ];
+  }
+
+  function getRows() {
+    return $this->db->fetchObjects(
+      "SELECT ID, post_title, post_name FROM wp_posts WHERE post_status = ? AND post_type = ?",
+      [
+        'publish',
+        'page',
+      ]
+    );
   }
 
   function getRow() {

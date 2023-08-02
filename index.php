@@ -90,13 +90,16 @@ function convertClassNameToFileName($class_name) {
 
 // Declaration of the actions:
 $routes = [
-    'GET /pages' => [
-        'query' => "SELECT ID, post_title, post_name FROM wp_posts WHERE post_status = ? AND post_type = ?",
-        'params' => [
-            'publish',
-            'page'
-        ],
-    ],
+    # 'GET /pages' => [
+    #     'query' => "SELECT ID, post_title, post_name FROM wp_posts WHERE post_status = ? AND post_type = ?",
+    #     'params' => [
+    #         'publish',
+    #         'page'
+    #     ],
+    # ],
+    'GET /pages/' => function () {
+      echo new PageIndex();
+    },
     'GET /pages/:id/edit' => function ($id) {
       echo new PageUpsert($id);
     },

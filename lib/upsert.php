@@ -1,7 +1,7 @@
 <?php
 
 class Upsert {
-  protected $id;
+  public $model, $id;
   function __construct($id) {
     $this->id = $id;
   }
