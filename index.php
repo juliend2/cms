@@ -57,13 +57,18 @@ function get_data($params) {
 spl_autoload_register(function ($class_name) {
 	// Convert the class name to filename format
 	$file_name = convertClassNameToFileName($class_name);
+	// try, in lib/:
+	$file_path = __DIR__.'/lib/'.$file_name;
+	if (file_exists($file_path)) {
+			require_once($file_path);
+	}
 	// try in actions/:
 	$file_path = __DIR__.'/actions/'.$file_name;
 	if (file_exists($file_path)) {
 			require_once($file_path);
 	}
-	// try again, in lib/:
-	$file_path = __DIR__.'/lib/'.$file_name;
+	// try again, in models/:
+	$file_path = __DIR__.'/models/'.$file_name;
 	if (file_exists($file_path)) {
 			require_once($file_path);
 	}
