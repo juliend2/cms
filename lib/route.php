@@ -107,6 +107,7 @@ if (isset($argc) && $argc > 0) {
     $r = new Route('GET', '/pages/:id');
     assert(count($r->getUriSegments()) == 2);
     assert($r->matches('/pages/1'));
+    assert(!$r->matches('/pages/1/delete'));
     assert(!$r->isIndex());
 
     $r = new Route('GET', '/pages');

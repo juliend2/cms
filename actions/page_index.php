@@ -5,6 +5,7 @@ class PageIndex extends Index {
   function __construct() {
     parent::__construct([
       'model'=>new Page([]),
+      'slug'=>'pages',
     ]);
   }
 }

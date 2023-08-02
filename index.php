@@ -12,12 +12,6 @@ require __DIR__.'/vendor/autoload.php';
 
 $db = new Database('localhost', 'root', 'root', 'cms_bandefm');
 
-function error_404() {
-    http_response_code(404);
-    echo '404 not found';
-    exit;
-}
-
 function handle_route($routes, $current_uri) {
     foreach ($routes as $route_str => $thing) {
         list($http_verb, $location) = explode(' ', $route_str);

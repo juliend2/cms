@@ -23,13 +23,4 @@ class Page extends WpPost {
       ]
     );
   }
-
-  function getRow() {
-    return $this->db->fetchObject(
-      "SELECT * FROM wp_posts WHERE ID = ? ",
-      [
-        $this->id,
-      ]
-    );
-  }
 }

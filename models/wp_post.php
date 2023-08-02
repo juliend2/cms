@@ -5,5 +5,14 @@ class WpPost extends Model {
   function __construct($opts) {
     parent::__construct($opts);
   }
+
+  function getRow() {
+    return $this->db->fetchObject(
+      "SELECT * FROM wp_posts WHERE ID = ? ",
+      [
+        $this->id,
+      ]
+    );
+  }
 }
 
