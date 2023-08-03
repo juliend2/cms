@@ -17,6 +17,11 @@ class RouteSegment {
         }
         return false;
     }
+
+    function __toString(): string
+    {
+        return (string)$this->segment;
+    }
 }
 
 class Route {
@@ -37,6 +42,16 @@ class Route {
     {
         if ($this->countSegments($url) !== count($this->getUriSegments())) {
             return false;
+        }
+        $url_segments = $this->getSegments($url);
+        $route_segments = $this->getUriSegments();
+        for ($i = 0; $i < count($url_segments); $i++) {
+          if ($route_segments[$i]->isParam()) {
+            continue;
+          }
+          if ((string)$route_segments[$i] != $url_segments[$i]) {
+            return false;
+          }
         }
         return true;
     }
@@ -111,6 +126,12 @@ if (isset($argc) && $argc > 0) {
     assert(!$r->isIndex());
 
     $r = new Route('GET', '/pages');
+    assert(count($r->getUriSegments()) == 1);
     assert($r->isIndex());
 
+    $r = new Route('GET', '/pages/:id/delete');
+    assert(count($r->getUriSegments()) == 3);
+    assert(!$r->isIndex());
+    assert($r->matches('/pages/1/delete'));
+    assert(!$r->matches('/pages/1/edit'));
 }
