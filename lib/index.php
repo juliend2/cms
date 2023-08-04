@@ -1,7 +1,11 @@
 <?php
 
 class Index {
-  public $model, $slug;
+  public
+    $can_write,
+    $model,
+    $slug;
+
   function __construct($opts) {
     $this->model = $opts['model'] ?? null;
     $this->slug = $opts['slug'] ?? null;

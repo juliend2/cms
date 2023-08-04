@@ -4,7 +4,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 ini_set('display_startup_errors', 'On');
 
-
 include './lib/helpers.php';
 include './lib/database.php';
 include './lib/route.php';
@@ -47,7 +46,6 @@ function get_data($params) {
     global $db;
     return $db->fetchObjects($params['query'], $params['params']);
 }
-
 
 spl_autoload_register(function ($class_name) {
 	// Convert the class name to filename format
@@ -126,4 +124,3 @@ $routes = [
 $current_uri = $_GET['uri'];
  
 handle_route($routes, $current_uri);
-

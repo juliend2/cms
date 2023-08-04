@@ -8,10 +8,16 @@ class PageUpsert extends Upsert {
     $this->model = new Page(['id'=>$this->id]);
   }
   function __toString() {
+    if (!empty($_POST)) {
+      $this->upsert();
+    }
     $html = '<form method="post" action="'.$_SERVER['REQUEST_URI'].'">';
     $data = $this->model->data;
     foreach ($this->model->form_fields as $field) {
       $field->value = $data->{$field->slug} ?? null;
+      if (isset($this->errors[$field->slug]) && $this->errors[$field->slug] !== true) {
+        $field->error = $this->errors[$field->slug];
+      }
       $html .= '<p>';
       $html .= $field;
       $html .= '</p>';
@@ -21,5 +27,13 @@ class PageUpsert extends Upsert {
 		$html .= '</form>';
     return $html;
   }
+
+  function upsert() {
+    if (!$this->isValid()) {
+      $this->errors = $this->model->getValidationErrors($_POST);
+      // return (string)$this;
+    }
+  }
+
 }
 

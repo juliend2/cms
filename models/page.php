@@ -1,7 +1,7 @@
 <?php
 
 class Page extends WpPost {
-  public $data = [];
+  public $id, $data = [];
   function __construct($opts) {
     parent::__construct($opts);
     $this->id = $opts['id'] ?? null;
@@ -9,8 +9,8 @@ class Page extends WpPost {
       $this->data = $this->getRow();
     }
     $this->form_fields = [
-      new Field(['slug'=>'post_title', 'name'=>'Title', 'type'=>'string']),
-      new Field(['slug'=>'post_name', 'name'=>'Slug', 'type'=>'string']),
+      new Field(['slug'=>'post_title', 'name'=>'Title', 'type'=>'string', 'validation'=>['notempty']]),
+      new Field(['slug'=>'post_name', 'name'=>'Slug', 'type'=>'string', 'validation'=>['notempty', 'onlyslugcharacters']]),
     ];
   }
 
