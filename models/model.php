@@ -50,7 +50,7 @@ class Model {
   }
 
   function validateOnlySlugCharacters($field, $posted_value) {
-    if (preg_match('/^[a-z0-9-]+$/i', $posted_value) === 1) {
+    if (preg_match('/^[a-z0-9-]+$/i', $posted_value) !== 1) {
       return "Only lowercase letters, digits and dashes are permitted.";
     }
     return true;

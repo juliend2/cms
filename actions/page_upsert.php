@@ -7,8 +7,9 @@ class PageUpsert extends Upsert {
     $this->id = $id;
     $this->model = new Page(['id'=>$this->id]);
   }
+
   function __toString() {
-    if (!empty($_POST)) {
+    if (!empty($_POST) && $this->validate($_POST)) {
       $this->upsert();
     }
     $html = '<form method="post" action="'.$_SERVER['REQUEST_URI'].'">';
@@ -29,10 +30,14 @@ class PageUpsert extends Upsert {
   }
 
   function upsert() {
+  }
+
+  function validate($posted) {
     if (!$this->isValid()) {
-      $this->errors = $this->model->getValidationErrors($_POST);
-      // return (string)$this;
+      $this->errors = $this->model->getValidationErrors($posted);
+      return false;
     }
+    return true;
   }
 
 }
